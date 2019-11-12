@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - BlockCiphers",
+            "request": "launch",
+            "mainClass": "BlockCiphers",
+            "projectName": "lab4_b080ccf9"
+        }
+    ]
+}
