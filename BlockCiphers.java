@@ -1,3 +1,5 @@
+package AES_Ciphers;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +25,12 @@ public class BlockCiphers {
 
     private static String encryptionFilename = "encrypted" + LocalDateTime.now().getNano() + ".txt";
     private static String decryptionFilename = "decrypted" + LocalDateTime.now().getNano() + ".txt";
+
+    private static byte byteMask = (byte) 0x01;
+
+    private static byte makeMistake(byte x) {
+        return CBC_Cipher.xor(x, byteMask); 
+    }
 
     private static byte[] encryptWithECB(String text, Key key) throws NoSuchAlgorithmException,
             NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException,
@@ -150,6 +158,8 @@ public class BlockCiphers {
         long finish = System.nanoTime();
         System.out.println("Encrypting using ECB time elapsed = " + (finish - start));
 
+        cryptogram[1] = makeMistake(cryptogram[1]); 
+
         System.out.println("Decrypting using ECB");
         start = System.nanoTime();
         String decryptedText = ""; 
@@ -181,6 +191,8 @@ public class BlockCiphers {
         }
         long finish = System.nanoTime();
         System.out.println("Encrypting using CBC time elapsed = " + (finish - start));
+
+        cryptogram[1] = makeMistake(cryptogram[1]); 
 
         System.out.println("Decrypting using CBC");
         start = System.nanoTime();
@@ -214,6 +226,8 @@ public class BlockCiphers {
         long finish = System.nanoTime();
         System.out.println("Encrypting using CTR time elapsed = " + (finish - start));
 
+        cryptogram[0] = makeMistake(cryptogram[0]); 
+
         System.out.println("Decrypting using CTR");
         start = System.nanoTime();
         String decryptedText = ""; 
@@ -245,6 +259,8 @@ public class BlockCiphers {
         }
         long finish = System.nanoTime();
         System.out.println("Encrypting using CFB time elapsed = " + (finish - start));
+
+        cryptogram[0] = makeMistake(cryptogram[0]); 
 
         System.out.println("Decrypting using CFB");
         start = System.nanoTime();
@@ -278,6 +294,8 @@ public class BlockCiphers {
         long finish = System.nanoTime();
         System.out.println("Encrypting using OFB time elapsed = " + (finish - start));
 
+        cryptogram[0] = makeMistake(cryptogram[0]); 
+
         System.out.println("Decrypting using OFB");
         start = System.nanoTime();
         String decryptedText = ""; 
@@ -292,6 +310,37 @@ public class BlockCiphers {
 
         System.out.println("Writing to files");
         Files.write(Paths.get("OFB" + encryptionFilename), cryptogram);
+        Files.write(Paths.get("OFB" + decryptionFilename), decryptedText.getBytes());
+    }
+
+    private static void performNewCBC(String text, Key key) throws IOException {
+        System.out.println("Encrypting using OFB");
+        String initVector = "mnbvcxzlkjhgfdsa";
+
+        long start = System.nanoTime(); 
+        String cryptogram = null;
+        try {
+            cryptogram = CBC_Cipher.encrypt(text, key, initVector); 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        long finish = System.nanoTime();
+        System.out.println("Encrypting using OFB time elapsed = " + (finish - start));
+
+        System.out.println("Decrypting using OFB");
+        start = System.nanoTime();
+        String decryptedText = null; 
+        try {
+            decryptedText = CBC_Cipher.decrypt(text, key, initVector); 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finish = System.nanoTime();
+        System.out.println("Decrypting using OFB time elapsed = " + (finish - start));
+
+        System.out.println("Writing to files");
+        Files.write(Paths.get("OFB" + encryptionFilename), cryptogram.getBytes());
         Files.write(Paths.get("OFB" + decryptionFilename), decryptedText.getBytes());
     }
 
@@ -311,10 +360,11 @@ public class BlockCiphers {
         List<String> lines = Files.readAllLines(Paths.get(inputFilename), StandardCharsets.UTF_8);
         String text = lines.stream().map(Object::toString).collect(Collectors.joining());
 
-        performECB(text, key);
-        performCBC(text, key);
-        performCTR(text, key);
-        performCFB(text, key);
-        performOFB(text, key);
+        // performECB(text, key);
+        // performCBC(text, key);
+        // performCTR(text, key);
+        // performCFB(text, key);
+        // performOFB(text, key);
+        performNewCBC(text, key);
     }
 }
